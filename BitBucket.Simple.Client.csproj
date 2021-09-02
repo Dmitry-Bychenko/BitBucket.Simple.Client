@@ -12,6 +12,7 @@
     <PackageReleaseNotes>Initial release</PackageReleaseNotes>
     <PackageIcon>BitBucket.png</PackageIcon>
     <PackageIconUrl />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
