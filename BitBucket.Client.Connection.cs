@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -15,7 +16,7 @@ namespace BitBucket.Simple.Client {
   //
   //-------------------------------------------------------------------------------------------------------------------
 
-  public sealed class BitBucketConnection {
+  public sealed class BitBucketConnection : IEquatable<BitBucketConnection> {
     #region Private Data
 
     private static readonly CookieContainer s_CookieContainer;
@@ -55,9 +56,34 @@ namespace BitBucket.Simple.Client {
     public BitBucketConnection(string login, string password, string server) {
       Login = login ?? throw new ArgumentNullException(nameof(login));
       Password = password ?? throw new ArgumentNullException(nameof(password));
-      Server = server?.Trim().TrimEnd('/') ?? throw new ArgumentNullException(nameof(server));
+      Server = server?.Trim()?.TrimEnd('/') ?? throw new ArgumentNullException(nameof(server));
 
       Auth = $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Login}:{Password}"))}";
+    }
+
+    // Data Source=http address;User ID=myUsername;password=myPassword;
+    /// <summary>
+    /// Conenction with Connection String 
+    /// </summary>
+    public BitBucketConnection(string connectionString) {
+      if (connectionString is null)
+        throw new ArgumentNullException(nameof(connectionString));
+
+      DbConnectionStringBuilder builder = new DbConnectionStringBuilder() {
+        ConnectionString = connectionString
+      };
+
+      if (builder.TryGetValue("User ID", out var login) &&
+          builder.TryGetValue("password", out var password) &&
+          builder.TryGetValue("Data Source", out var server)) {
+        Login = login?.ToString() ?? throw new ArgumentNullException(nameof(login));
+        Password = password?.ToString() ?? throw new ArgumentNullException(nameof(password));
+        Server = server?.ToString()?.Trim()?.TrimEnd('/') ?? throw new ArgumentNullException(nameof(server));
+
+        Auth = $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Login}:{Password}"))}";
+      }
+      else
+        throw new ArgumentException("Invalid connection string", nameof(connectionString));
     }
 
     #endregion Create
@@ -100,6 +126,37 @@ namespace BitBucket.Simple.Client {
     public override string ToString() => $"{Login}@{Server}";
 
     #endregion Public
+
+    #region IEquatable<BitBucketConnection>
+
+    /// <summary>
+    /// Equals 
+    /// </summary>
+    public bool Equals(BitBucketConnection other) {
+      if (ReferenceEquals(this, other))
+        return true;
+      if (other is null)
+        return false;
+
+      return string.Equals(Login, other.Login) &&
+             string.Equals(Password, other.Password) &&
+             string.Equals(Server, other.Server, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Equals
+    /// </summary>
+    public override bool Equals(object obj) => obj is BitBucketConnection other && Equals(other);
+
+    /// <summary>
+    /// Get Hash Code
+    /// </summary>
+    public override int GetHashCode() =>
+      Login.GetHashCode() ^
+      Password.GetHashCode() ^
+      Server.GetHashCode(StringComparison.OrdinalIgnoreCase);
+    
+    #endregion IEquatable<BitBucketConnection>
   }
 
 }

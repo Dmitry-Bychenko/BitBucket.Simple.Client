@@ -30,6 +30,12 @@ namespace BitBucket.Simple.Client {
 
     #endregion Constants
 
+    #region Private Data
+
+    private int m_DefaultPageSize = DEFAULT_PAGE_SIZE;
+
+    #endregion Private Data
+
     #region Create
 
     /// <summary>
@@ -49,14 +55,27 @@ namespace BitBucket.Simple.Client {
     public BitBucketConnection Connection { get; }
 
     /// <summary>
+    /// Default Page Size
+    /// </summary>
+    public int DefaultPageSize {
+      get => m_DefaultPageSize;
+      set {
+        if (value <= 0 || value >= 1000)
+          throw new ArgumentOutOfRangeException(nameof(value));
+
+        m_DefaultPageSize = value;
+      }
+    }
+
+    /// <summary>
     /// Query
     /// </summary>
-    /// <param name="address"></param>
-    /// <param name="query"></param>
-    /// <param name="method"></param>
+    /// <param name="address">Address</param>
+    /// <param name="query">Query</param>
+    /// <param name="method">Http Method</param>
     /// <returns></returns>
     public async Task<JsonDocument> QueryAsync(string address, string query, HttpMethod method, CancellationToken token) {
-      if (string.IsNullOrEmpty(address))
+      if (address is null)
         throw new ArgumentNullException(nameof(address));
 
       address = string.Join("/", 
@@ -65,7 +84,12 @@ namespace BitBucket.Simple.Client {
         "api",
         "latest",
          address.TrimStart('/'));
-
+            
+      if (address.Contains('?'))
+        address += $"&limit={DefaultPageSize}";
+      else
+        address += $"?limit={DefaultPageSize}";
+      
       query ??= "{}";
 
       using var req = new HttpRequestMessage {
@@ -146,11 +170,11 @@ namespace BitBucket.Simple.Client {
                                                                 int pageSize,
                                                                 [EnumeratorCancellation]
                                                                 CancellationToken token) {
-      if (string.IsNullOrEmpty(address))
+      if (address is null)
         throw new ArgumentNullException(nameof(address));
 
       if (pageSize <= 0)
-        pageSize = DEFAULT_PAGE_SIZE;
+        pageSize = DefaultPageSize;
 
       address = string.Join("/", 
          Connection.Server.TrimEnd('/'), 
@@ -260,7 +284,7 @@ namespace BitBucket.Simple.Client {
                                                                 HttpMethod method,
                                                                [EnumeratorCancellation]
                                                                 CancellationToken token) {
-      await foreach (var item in QueryPagedAsync(address, query, method, DEFAULT_PAGE_SIZE, token))
+      await foreach (var item in QueryPagedAsync(address, query, method, -1, token))
         yield return item;
     }
 
@@ -270,7 +294,7 @@ namespace BitBucket.Simple.Client {
     public async IAsyncEnumerable<JsonDocument> QueryPagedAsync(string address,
                                                                 string query,
                                                                 HttpMethod method) {
-      await foreach (var item in QueryPagedAsync(address, query, method, DEFAULT_PAGE_SIZE, CancellationToken.None))
+      await foreach (var item in QueryPagedAsync(address, query, method, -1, CancellationToken.None))
         yield return item;
     }
 
@@ -281,7 +305,7 @@ namespace BitBucket.Simple.Client {
                                                                 string query,
                                                                [EnumeratorCancellation]
                                                                 CancellationToken token) {
-      await foreach (var item in QueryPagedAsync(address, query, HttpMethod.Post, DEFAULT_PAGE_SIZE, token))
+      await foreach (var item in QueryPagedAsync(address, query, HttpMethod.Post, -1, token))
         yield return item;
     }
 
@@ -290,7 +314,7 @@ namespace BitBucket.Simple.Client {
     /// </summary>
     public async IAsyncEnumerable<JsonDocument> QueryPagedAsync(string address,
                                                                 string query) {
-      await foreach (var item in QueryPagedAsync(address, query, HttpMethod.Post, DEFAULT_PAGE_SIZE, CancellationToken.None))
+      await foreach (var item in QueryPagedAsync(address, query, HttpMethod.Post, -1, CancellationToken.None))
         yield return item;
     }
 
@@ -300,7 +324,7 @@ namespace BitBucket.Simple.Client {
     public async IAsyncEnumerable<JsonDocument> QueryPagedAsync(string address,
                                                                [EnumeratorCancellation]
                                                                 CancellationToken token) {
-      await foreach (var item in QueryPagedAsync(address, "", HttpMethod.Get, DEFAULT_PAGE_SIZE, token))
+      await foreach (var item in QueryPagedAsync(address, "", HttpMethod.Get, -1, token))
         yield return item;
     }
 
@@ -308,7 +332,7 @@ namespace BitBucket.Simple.Client {
     /// Paged Query 
     /// </summary>
     public async IAsyncEnumerable<JsonDocument> QueryPagedAsync(string address) {
-      await foreach (var item in QueryPagedAsync(address, "", HttpMethod.Get, DEFAULT_PAGE_SIZE, CancellationToken.None))
+      await foreach (var item in QueryPagedAsync(address, "", HttpMethod.Get, -1, CancellationToken.None))
         yield return item;
     }
 
