@@ -60,11 +60,6 @@ namespace BitBucket.Simple.Client {
       Auth = $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Login}:{Password}"))}";
     }
 
-    /// <summary>
-    /// Standard Constructor
-    /// </summary>
-    public BitBucketConnection(string login, string password) : this(login, password, null) { }
-
     #endregion Create
 
     #region Public
