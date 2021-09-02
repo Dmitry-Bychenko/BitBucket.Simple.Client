@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>BitBucket.Simple.Client.snk.pfx</AssemblyOriginatorKeyFile>
+    <Authors>Dmitry Bychenko</Authors>
+    <Description>Simple BitBucket Client</Description>
+    <Copyright>Copyright (c) 2021 by Dmitry Bychenko</Copyright>
+  </PropertyGroup>
+
+</Project>

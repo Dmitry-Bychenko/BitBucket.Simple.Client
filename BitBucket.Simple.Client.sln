@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitBucket.Simple.Client", "BitBucket.Simple.Client.csproj", "{BEED0282-C1DF-4A83-9C6B-04FF969A3770}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BEED0282-C1DF-4A83-9C6B-04FF969A3770}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEED0282-C1DF-4A83-9C6B-04FF969A3770}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEED0282-C1DF-4A83-9C6B-04FF969A3770}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEED0282-C1DF-4A83-9C6B-04FF969A3770}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ECC4B846-7616-42AD-B39A-44AE3268866B}
+	EndGlobalSection
+EndGlobal
