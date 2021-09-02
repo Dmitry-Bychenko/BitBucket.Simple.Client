@@ -78,18 +78,18 @@ namespace BitBucket.Simple.Client {
       if (address is null)
         throw new ArgumentNullException(nameof(address));
 
-      address = string.Join("/", 
-         Connection.Server.TrimEnd('/'), 
-        "rest", 
+      address = string.Join("/",
+         Connection.Server.TrimEnd('/'),
+        "rest",
         "api",
         "latest",
          address.TrimStart('/'));
-            
+
       if (address.Contains('?'))
         address += $"&limit={DefaultPageSize}";
       else
         address += $"?limit={DefaultPageSize}";
-      
+
       query ??= "{}";
 
       using var req = new HttpRequestMessage {
@@ -176,8 +176,8 @@ namespace BitBucket.Simple.Client {
       if (pageSize <= 0)
         pageSize = DefaultPageSize;
 
-      address = string.Join("/", 
-         Connection.Server.TrimEnd('/'), 
+      address = string.Join("/",
+         Connection.Server.TrimEnd('/'),
         "rest",
         "api",
         "latest",

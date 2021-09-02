@@ -69,16 +69,16 @@ namespace BitBucket.Simple.Client {
       if (connectionString is null)
         throw new ArgumentNullException(nameof(connectionString));
 
-      DbConnectionStringBuilder builder = new DbConnectionStringBuilder() {
+      DbConnectionStringBuilder builder = new() {
         ConnectionString = connectionString
       };
 
       if (builder.TryGetValue("User ID", out var login) &&
           builder.TryGetValue("password", out var password) &&
           builder.TryGetValue("Data Source", out var server)) {
-        Login = login?.ToString() ?? throw new ArgumentNullException(nameof(login));
-        Password = password?.ToString() ?? throw new ArgumentNullException(nameof(password));
-        Server = server?.ToString()?.Trim()?.TrimEnd('/') ?? throw new ArgumentNullException(nameof(server));
+        Login = login?.ToString() ?? throw new ArgumentException("Login not found", nameof(connectionString));
+        Password = password?.ToString() ?? throw new ArgumentException("Password not found", nameof(connectionString));
+        Server = server?.ToString()?.Trim()?.TrimEnd('/') ?? throw new ArgumentException("Server not found", nameof(connectionString));
 
         Auth = $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Login}:{Password}"))}";
       }
@@ -155,7 +155,7 @@ namespace BitBucket.Simple.Client {
       Login.GetHashCode() ^
       Password.GetHashCode() ^
       Server.GetHashCode(StringComparison.OrdinalIgnoreCase);
-    
+
     #endregion IEquatable<BitBucketConnection>
   }
 
