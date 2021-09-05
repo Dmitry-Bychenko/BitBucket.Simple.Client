@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace Jira.Simple.Client.Json {
+namespace BitBucket.Simple.Client.Json {
 
   //-------------------------------------------------------------------------------------------------------------------
   //

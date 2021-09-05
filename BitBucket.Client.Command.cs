@@ -26,7 +26,7 @@ namespace BitBucket.Simple.Client {
     /// <summary>
     /// Default Page Size for QueryPagedAsync
     /// </summary>
-    public const int DEFAULT_PAGE_SIZE = 500;
+    public const int DEFAULT_PAGE_SIZE = 100;
 
     #endregion Constants
 
@@ -74,6 +74,57 @@ namespace BitBucket.Simple.Client {
     /// <param name="query">Query</param>
     /// <param name="method">Http Method</param>
     /// <returns></returns>
+    public async Task<(JsonDocument document, string error)> TryQueryAsync(string address, string query, HttpMethod method, CancellationToken token) {
+      if (address is null)
+        throw new ArgumentNullException(nameof(address));
+
+      address = string.Join("/",
+         Connection.Server.TrimEnd('/'),
+        "rest",
+        "api",
+        "latest",
+         address.TrimStart('/'));
+
+      if (address.Contains('?'))
+        address += $"&limit={DefaultPageSize}";
+      else
+        address += $"?limit={DefaultPageSize}";
+
+      query ??= "{}";
+
+      using var req = new HttpRequestMessage {
+        Method = method,
+        RequestUri = new Uri(address),
+        Headers = {
+          { HttpRequestHeader.Accept.ToString(), "application/json" },
+          { HttpRequestHeader.Authorization.ToString(), Connection.Auth},
+        },
+        Content = new StringContent(query, Encoding.UTF8, "application/json")
+      };
+
+      var response = await BitBucketConnection.Client.SendAsync(req, token).ConfigureAwait(false);
+
+      if (!response.IsSuccessStatusCode) {
+        string message = response.ReasonPhrase;
+
+        if (string.IsNullOrWhiteSpace(message))
+          message = $"Failed with code {(int)(response.StatusCode)}: {response.StatusCode}";
+
+        return (null, message);
+      }
+
+      using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
+
+      return (await JsonDocument.ParseAsync(stream, default, token).ConfigureAwait(false), null);
+    }
+
+    /// <summary>
+    /// Query
+    /// </summary>
+    /// <param name="address">Address</param>
+    /// <param name="query">Query</param>
+    /// <param name="method">Http Method</param>
+    /// <returns></returns>
     public async Task<JsonDocument> QueryAsync(string address, string query, HttpMethod method, CancellationToken token) {
       if (address is null)
         throw new ArgumentNullException(nameof(address));
@@ -104,8 +155,14 @@ namespace BitBucket.Simple.Client {
 
       var response = await BitBucketConnection.Client.SendAsync(req, token).ConfigureAwait(false);
 
-      if (!response.IsSuccessStatusCode)
-        throw new DataException(response.ReasonPhrase);
+      if (!response.IsSuccessStatusCode) {
+        string message = response.ReasonPhrase;
+
+        if (string.IsNullOrWhiteSpace(message))
+          message = $"Failed with code {(int)(response.StatusCode)}: {response.StatusCode}";
+
+        throw new DataException(message);
+      }
 
       using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
