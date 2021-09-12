@@ -128,6 +128,11 @@ namespace BitBucket.Simple.Client {
     }
 
     /// <summary>
+    /// Connect Async
+    /// </summary>
+    public async Task ConnectAsync() => await ConnectAsync(CancellationToken.None);
+
+    /// <summary>
     /// Login
     /// </summary>
     public string Login { get; }
