@@ -143,15 +143,15 @@ namespace BitBucket.Simple.Client {
       for (bool loop = true; loop;) {
         loop = false;
 
-        var response = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
+        var (document, _) = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
 
-        if (response.document is not null)
-          using (response.document) {
-            foreach (var item in response.document.RootElement.GetProperty("values").EnumerateArray())
+        if (document is not null)
+          using (document) {
+            foreach (var item in document.RootElement.GetProperty("values").EnumerateArray())
               yield return item;
 
-            if (loop = !response.document.RootElement.GetProperty("isLastPage").GetBoolean())
-              startAt = response.document.RootElement.GetProperty("nextPageStart").GetInt32();
+            if (loop = !document.RootElement.GetProperty("isLastPage").GetBoolean())
+              startAt = document.RootElement.GetProperty("nextPageStart").GetInt32();
           }
       }
     }
@@ -165,12 +165,12 @@ namespace BitBucket.Simple.Client {
 
       var query = connection.CreateQuery();
 
-      await foreach (var pair in AllReposAsync(connection)) {
+      await foreach (var (project, repo) in AllReposAsync(connection)) {
         string jql = string.Join("/",
           "projects",
-           pair.project.GetProperty("key").GetString(),
+           project.GetProperty("key").GetString(),
           "repos",
-           pair.repo.GetProperty("slug").GetString(),
+           repo.GetProperty("slug").GetString(),
           "commits");
 
         jql += $"?limit={PAGE_SIZE}";
@@ -179,15 +179,15 @@ namespace BitBucket.Simple.Client {
         for (bool loop = true; loop;) {
           loop = false;
 
-          var response = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
+          var (document, _) = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
 
-          if (response.document is not null)
-            using (response.document) {
-              foreach (var item in response.document.RootElement.GetProperty("values").EnumerateArray())
-                yield return (pair.project, pair.repo, item);
+          if (document is not null)
+            using (document) {
+              foreach (var item in document.RootElement.GetProperty("values").EnumerateArray())
+                yield return (project, repo, item);
 
-              if (loop = !response.document.RootElement.GetProperty("isLastPage").GetBoolean())
-                startAt = response.document.RootElement.GetProperty("nextPageStart").GetInt32();
+              if (loop = !document.RootElement.GetProperty("isLastPage").GetBoolean())
+                startAt = document.RootElement.GetProperty("nextPageStart").GetInt32();
             }
         }
       }
@@ -218,15 +218,15 @@ namespace BitBucket.Simple.Client {
       for (bool loop = true; loop;) {
         loop = false;
 
-        var response = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
+        var (document, _) = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
 
-        if (response.document is not null)
-          using (response.document) {
-            foreach (var item in response.document.RootElement.GetProperty("values").EnumerateArray())
+        if (document is not null)
+          using (document) {
+            foreach (var item in document.RootElement.GetProperty("values").EnumerateArray())
               yield return item;
 
-            if (loop = response.document.RootElement.GetProperty("isLastPage").GetBoolean())
-              startAt = response.document.RootElement.GetProperty("nextPageStart").GetInt32();
+            if (loop = document.RootElement.GetProperty("isLastPage").GetBoolean())
+              startAt = document.RootElement.GetProperty("nextPageStart").GetInt32();
           }
       }
     }
@@ -240,12 +240,12 @@ namespace BitBucket.Simple.Client {
 
       var query = connection.CreateQuery();
 
-      await foreach (var pair in AllReposAsync(connection)) {
+      await foreach (var (project, repo) in AllReposAsync(connection)) {
         string jql = string.Join("/",
           "projects",
-           pair.project.GetProperty("key").GetString(),
+           project.GetProperty("key").GetString(),
           "repos",
-           pair.repo.GetProperty("slug").GetString(),
+           repo.GetProperty("slug").GetString(),
           "branches");
 
         jql += $"?limit={PAGE_SIZE}";
@@ -254,15 +254,15 @@ namespace BitBucket.Simple.Client {
         for (bool loop = true; loop;) {
           loop = false;
 
-          var response = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
+          var (document, _) = await query.TryQueryAsync(jql + $"&start={startAt}", "", HttpMethod.Get, CancellationToken.None);
 
-          if (response.document is not null)
-            using (response.document) {
-              foreach (var item in response.document.RootElement.GetProperty("values").EnumerateArray())
-                yield return (pair.project, pair.repo, item);
+          if (document is not null)
+            using (document) {
+              foreach (var item in document.RootElement.GetProperty("values").EnumerateArray())
+                yield return (project, repo, item);
 
-              if (loop = !response.document.RootElement.GetProperty("isLastPage").GetBoolean())
-                startAt = response.document.RootElement.GetProperty("nextPageStart").GetInt32();
+              if (loop = !document.RootElement.GetProperty("isLastPage").GetBoolean())
+                startAt = document.RootElement.GetProperty("nextPageStart").GetInt32();
             }
         }
       }

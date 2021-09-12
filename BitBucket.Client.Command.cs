@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,39 @@ namespace BitBucket.Simple.Client {
 
     private int m_DefaultPageSize = DEFAULT_PAGE_SIZE;
 
+    private static readonly Regex s_AddressRegex = new(@"^\s*([\p{L}0-9]*)\s*[;,:]+\s*", RegexOptions.Compiled);
+
     #endregion Private Data
+
+    #region Algorithm
+
+    private string MakeAddress(string address) {
+      if (string.IsNullOrWhiteSpace(address))
+        return "";
+
+      address = address.Trim('/', ' ');
+
+      if (address.StartsWith("rest/", StringComparison.OrdinalIgnoreCase))
+        return string.Join("/", Connection.Server, address);
+      else {
+        var match = s_AddressRegex.Match(address);
+
+        if (match.Success) {
+          string api = match.Groups[1].Value;
+
+          if (string.IsNullOrWhiteSpace(api))
+            api = "api";
+
+#pragma warning disable IDE0057 // Use range operator
+          return string.Join("/", Connection.Server, $"rest/{api}/latest", address.Substring(match.Index + match.Length).Trim('/', ' '));
+#pragma warning restore IDE0057 // Use range operator
+        }
+        else
+          return string.Join("/", Connection.Server, "rest/api/latest", address);
+      }
+    }
+
+    #endregion Algorithm
 
     #region Create
 
@@ -78,12 +111,14 @@ namespace BitBucket.Simple.Client {
       if (address is null)
         throw new ArgumentNullException(nameof(address));
 
-      address = string.Join("/",
-         Connection.Server.TrimEnd('/'),
-        "rest",
-        "api",
-        "latest",
-         address.TrimStart('/'));
+      address = MakeAddress(address);
+
+      //address = string.Join("/",
+      //   Connection.Server.TrimEnd('/'),
+      //  "rest",
+      //  "api",
+      //  "latest",
+      //   address.TrimStart('/'));
 
       if (address.Contains('?'))
         address += $"&limit={DefaultPageSize}";
@@ -113,6 +148,8 @@ namespace BitBucket.Simple.Client {
         return (null, message);
       }
 
+      Connection.m_IsConnected = true;
+
       using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
       return (await JsonDocument.ParseAsync(stream, default, token).ConfigureAwait(false), null);
@@ -129,12 +166,7 @@ namespace BitBucket.Simple.Client {
       if (address is null)
         throw new ArgumentNullException(nameof(address));
 
-      address = string.Join("/",
-         Connection.Server.TrimEnd('/'),
-        "rest",
-        "api",
-        "latest",
-         address.TrimStart('/'));
+      address = MakeAddress(address);
 
       if (address.Contains('?'))
         address += $"&limit={DefaultPageSize}";
@@ -163,6 +195,8 @@ namespace BitBucket.Simple.Client {
 
         throw new DataException(message);
       }
+
+      Connection.m_IsConnected = true;
 
       using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 
@@ -233,12 +267,7 @@ namespace BitBucket.Simple.Client {
       if (pageSize <= 0)
         pageSize = DefaultPageSize;
 
-      address = string.Join("/",
-         Connection.Server.TrimEnd('/'),
-        "rest",
-        "api",
-        "latest",
-         address.TrimStart('/'));
+      address = MakeAddress(address);
 
       if (address.Contains('?'))
         address += $"&limit={pageSize}";
@@ -266,6 +295,8 @@ namespace BitBucket.Simple.Client {
           throw new DataException(string.IsNullOrEmpty(response.ReasonPhrase)
             ? $"Query failed with {response.StatusCode} ({(int)response.StatusCode}) code"
             : response.ReasonPhrase);
+
+        Connection.m_IsConnected = true;
 
         using Stream stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
 

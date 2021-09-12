@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BitBucket.Simple.Client {
 
@@ -12,6 +13,7 @@ namespace BitBucket.Simple.Client {
   /// <summary>
   /// BitBacket Connection
   /// </summary>
+  /// <seealso cref="https://docs.atlassian.com/bitbucket-server/rest/5.7.0/bitbucket-rest.html"/>
   /// <seealso cref="https://developer.atlassian.com/server/bitbucket/reference/rest-api/"/>
   //
   //-------------------------------------------------------------------------------------------------------------------
@@ -22,6 +24,8 @@ namespace BitBucket.Simple.Client {
     private static readonly CookieContainer s_CookieContainer;
 
     private static readonly HttpClient s_HttpClient;
+
+    internal bool m_IsConnected;
 
     #endregion Private Data
 
@@ -99,6 +103,29 @@ namespace BitBucket.Simple.Client {
     /// Create Query
     /// </summary>
     public BitBucketQuery CreateQuery() => new(this);
+
+    /// <summary>
+    /// Is Connected
+    /// </summary>
+    public bool IsConnected => m_IsConnected;
+
+    /// <summary>
+    /// Connect Async
+    /// </summary>
+    public async Task ConnectAsync(CancellationToken token) {
+      if (m_IsConnected)
+        return;
+
+      token.ThrowIfCancellationRequested();
+
+      var q = CreateQuery();
+
+      q.DefaultPageSize = 1;
+
+      using var doc = await q.QueryAsync("users", token).ConfigureAwait(false);
+
+      m_IsConnected = true;
+    }
 
     /// <summary>
     /// Login
