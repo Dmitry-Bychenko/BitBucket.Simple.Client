@@ -1,7 +1,8 @@
 # BitBucket.Simple.Client
-BitBucket Simple Client
 
-Demo:
+[![NuGet version (BitBucket.Simple.Client)](https://img.shields.io/nuget/v/BitBucket.Simple.Client.svg?style=flat-square)](https://www.nuget.org/packages/BitBucket.Simple.Client/)
+
+**Demo**:
 
 ```c#
 
