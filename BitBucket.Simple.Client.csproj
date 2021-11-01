@@ -9,13 +9,12 @@
     <Copyright>Copyright (c) 2021 by Dmitry Bychenko</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/Dmitry-Bychenko/BitBucket.Simple.Client</RepositoryUrl>
-    <PackageReleaseNotes>Explicit Connection (can be omitted)
-Namespaces</PackageReleaseNotes>
+    <PackageReleaseNotes>Server Info</PackageReleaseNotes>
     <PackageIcon>BitBucket.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>BitBucket</PackageTags>
-    <Version>1.0.0.3</Version>
+    <Version>1.0.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

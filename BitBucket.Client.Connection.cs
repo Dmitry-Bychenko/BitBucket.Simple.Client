@@ -153,6 +153,23 @@ namespace BitBucket.Simple.Client {
     public string Server { get; }
 
     /// <summary>
+    /// Server Info
+    /// </summary>
+    public async Task<BitBucketServerInfo> ServerInfoAsync(CancellationToken token) {
+      var cmd = CreateQuery();
+
+      using var json = await cmd.QueryAsync("application-properties", token).ConfigureAwait(false);
+
+      return new BitBucketServerInfo(json);
+    }
+
+    /// <summary>
+    /// Server Info
+    /// </summary>
+    public async Task<BitBucketServerInfo> ServerInfoAsync() =>
+      await ServerInfoAsync(CancellationToken.None).ConfigureAwait(false);
+
+    /// <summary>
     /// To String
     /// </summary>
     public override string ToString() => $"{Login}@{Server}";
